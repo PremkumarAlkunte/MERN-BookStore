@@ -4,6 +4,7 @@ import Spinner from '../components/spinner'
 import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import { useSnackbar } from 'notistack';
 
 const editBook = () => {
   const [title, setTitle] = useState('');
@@ -12,40 +13,45 @@ const editBook = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const {id} = useParams();
+  const { enqueueSnackbar } = useSnackbar();
+
   useEffect(() => {
     setLoading(true);
-    axios
-      .get(`http://localhost:5555/books/${id}`)
-      .then((response) => {
-        setAuthor(response.data.author)
+    axios.get(`http://localhost:5555/books/${id}`)
+    .then((response) => {
+        setAuthor(response.data.author);
         setPublishYear(response.data.publishYear)
         setTitle(response.data.title)
-        setLoading(false)
-      }).catch((error) =>{
         setLoading(false);
-        alert('An error Occured. Please check the console');
+      }).catch((error) => {
+        setLoading(false);
+        alert('An error happened. Please Chack console');
         console.log(error);
-      })
-  },[])
+      });
+  }, [])
+  
   const handleEditBook = () => {
     const data = {
       title,
       author,
-      publishYear
-    }
+      publishYear,
+    };
     setLoading(true);
     axios
-      .put( `http://localhost:5555/books/${id}`,data)
+      .put(`http://localhost:5555/books/${id}`, data)
       .then(() => {
         setLoading(false);
+        enqueueSnackbar('Book Edited successfully', { variant: 'success' });
         navigate('/');
       })
       .catch((error) => {
         setLoading(false);
-        alert('An error happened. Please check console');
-        console.log(error)
-      })
-  }
+        // alert('An error happened. Please Chack console');
+        enqueueSnackbar('Error', { variant: 'error' });
+        console.log(error);
+      });
+  };
+
   return (
     <div className='p-4'>
       <BackButton />
@@ -84,7 +90,7 @@ const editBook = () => {
         </button>
       </div>
     </div>
-  );
+  )
 }
 
 export default editBook
